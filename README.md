@@ -42,7 +42,7 @@ npm install
 cp .env.example .env
 ```
 Fill in `.env`: `DATABASE_URL` (Neon), `JWT_SECRET` (any long random
-string), `GOOGLE_CLIENT_ID`, `GEMINI_API_KEY`.
+string), `GOOGLE_CLIENT_ID`, `GROQ_API_KEY`.
 
 ```
 npx prisma migrate dev --name init
@@ -87,7 +87,7 @@ You'll deploy three separate services. All can be on Render's free tier.
 - Build command: `npm install && npx prisma generate`
 - Start command: `npm start`
 - Environment variables: `DATABASE_URL`, `JWT_SECRET`, `GOOGLE_CLIENT_ID`,
-  `GEMINI_API_KEY`, and `FRONTEND_URL` (fill this in after deploying the
+  `GROQ_API_KEY`, and `FRONTEND_URL` (fill this in after deploying the
   frontend, see below).
 - After first deploy, run the migration once from your own computer:
   temporarily point your local `backend/.env`'s `DATABASE_URL` at the same

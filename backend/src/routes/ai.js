@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import requireAuth from "../middleware/requireAuth.js";
-import { chatAboutDocument, editText, transcribeImage } from "../utils/gemini.js";
+import { chatAboutDocument, editText, transcribeImage } from "../utils/groq.js";
 
 const router = Router();
 router.use(requireAuth);
