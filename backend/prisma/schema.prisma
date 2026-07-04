@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  name         String
+  passwordHash String?    // null for Google-only accounts
+  googleId     String?    @unique
+  avatarUrl    String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  documents    Document[]
+}
+
+model Document {
+  id         String   @id @default(uuid())
+  title      String   @default("Untitled document")
+  // The live collaborative state (a Yjs binary snapshot), written by the
+  // real-time collaboration server. Null until someone opens the doc once.
+  ydoc       Bytes?
+  // A plain-text mirror of the document, kept in sync on every save, used
+  // for the dashboard preview, search, and as input to the AI features.
+  plainText  String   @default("")
+  ownerId    String
+  owner      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}

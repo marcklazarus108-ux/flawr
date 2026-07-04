@@ -1,0 +1,72 @@
+services:
+  # Main API - handles sign-in, documents, AI features, exports
+  - type: web
+    name: flawr-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: FRONTEND_URL
+        fromService:
+          name: flawr-frontend
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+
+  # Real-time collaboration server (WebSockets) - separate process, same codebase
+  - type: web
+    name: flawr-collab
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate
+    startCommand: npx prisma migrate deploy && npm run collab
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          name: flawr-backend
+          type: web
+          envVarKey: DATABASE_URL
+      - key: JWT_SECRET
+        fromService:
+          name: flawr-backend
+          type: web
+          envVarKey: JWT_SECRET
+
+  # Frontend - the React app, built as static files
+  - type: web
+    name: flawr-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: >-
+      npm install &&
+      export VITE_API_URL="$BACKEND_URL/api" &&
+      export VITE_COLLAB_URL="${COLLAB_URL/https:/wss:}" &&
+      npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: BACKEND_URL
+        fromService:
+          name: flawr-backend
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: COLLAB_URL
+        fromService:
+          name: flawr-collab
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: VITE_GOOGLE_CLIENT_ID
+        fromService:
+          name: flawr-backend
+          type: web
+          envVarKey: GOOGLE_CLIENT_ID
